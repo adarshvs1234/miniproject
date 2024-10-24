@@ -25,7 +25,9 @@ const transactionSchema = new mongoose.Schema({
         // required:[true,"Transaction is required"]
     },
     
-
+    id:{
+        type:Number
+    },
 
 
 userId:{
