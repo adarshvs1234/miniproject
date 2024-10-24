@@ -10,13 +10,17 @@ const transactionController = {
     addTransaction : asyncHandler(async(req,res)=>{
 
         const {num,amount,category,description,transactionType} = req.body
+       
         if(!amount || !category || !description || !transactionType || !num)
             throw new Error("Data is incomplete")
 
+        // if(!)
+        //     throw new Error("num already exist")
+
     
         //     const  user = await User.find({userId})
-    //     if(!user)
-    //         throw new Error("The user doesn't exist")
+        // if(!user)
+        //     throw new Error("The user doesn't exist")
 
        const createdTransaction = await Transaction.create({
 
@@ -26,10 +30,13 @@ const transactionController = {
            transactionType,
            num
        })
-       
-       
+       const checkNum = await Transaction.exists({num})
+       if(checkNum)
+            throw new Error("num already exist")
+
        if(!createdTransaction)
         throw new Error("Transaction is not created")
+       
        
        res.send("Transaction added successfully")
     
@@ -56,11 +63,19 @@ getTransaction : asyncHandler(async(req,res)=>{
    
 res.send(data)
     // res.send(data)
+}),
+
+deleteTransaction : asyncHandler(async(req,res)=>{
+
+    const {num} = req.body
+    if(!num)
+        throw new Error("Data incomplete")
+
+    const deletedData = await Transaction.findOneAndDelete({num})
+    res.send("Successfully deleted")
+
 })
-
-delete
 }
-
 
 module.exports = transactionController
 
