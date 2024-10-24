@@ -2,9 +2,9 @@ const express = require('express')
 const transactionController = require('../controller/transactionController')
 const transactionRouter = express.Router()
 
-transactionRouter.post("/addtransaction",transactionController.addTransaction) 
-transactionRouter.post("/updatetransaction",transactionController.updateTransaction)
-transactionRouter.post("/gettransaction",transactionController.getTransaction)
-transactionRouter.post("/deletetransaction",transactionController.deleteTransaction)
+transactionRouter.post("/transaction",transactionController.addTransaction) 
+transactionRouter.put("/transaction/:id",transactionController.updateTransaction)
+transactionRouter.get("/transaction/:id",transactionController.getTransaction)
+transactionRouter.delete("/transaction/:id",transactionController.deleteTransaction)
 
-module.exports = transactionRouter
+module.exports = transactionRouter  

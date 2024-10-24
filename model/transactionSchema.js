@@ -14,7 +14,7 @@ const transactionSchema = new mongoose.Schema({
         // required:[true,"Category is required"]
     },
 
-    description:{
+    description:{   
         type:String,
         // required:[true,"Description is required"],
     
@@ -24,9 +24,7 @@ const transactionSchema = new mongoose.Schema({
         type:String,
         // required:[true,"Transaction is required"]
     },
-    num:{
-        type:Number
-    },
+    
 
 
 
