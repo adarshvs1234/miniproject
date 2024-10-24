@@ -5,27 +5,30 @@ const transactionSchema = new mongoose.Schema({
 
     amount : {
         type:Number,
-        required:[true,"Amount is required"],
+        // required:[true,"Amount is required"],
         default:0
     },
 
     category:{
         type:String,
-        required:[true,"Category is required"]
+        // required:[true,"Category is required"]
     },
 
     description:{
         type:String,
-        required:[true,"Description is required"],
+        // required:[true,"Description is required"],
     
     },
 
     transactionType:{
         type:String,
-        required:[true,"Transaction is required"]
+        // required:[true,"Transaction is required"]
+    },
+    num:{
+        type:Number
     },
 
-    // Timestamp: true,
+
 
 userId:{
 

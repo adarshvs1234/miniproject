@@ -4,4 +4,5 @@ const transactionRouter = require('./transactionRouter')
 
 const router = express()
 router.use('/user',userRouter)
+router.use('/transaction',transactionRouter)
 module.exports = router
