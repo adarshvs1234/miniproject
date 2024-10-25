@@ -1,7 +1,9 @@
 const express =  require('express')
-const categoryController = require('../controller/categoryController')
+const transactionController = require('../controller/transactionController')
 const categoryRouter = express.Router()
 
-categoryRouter.post("/category",categoryController.addCategory)
+categoryRouter.post("/category",transactionController.addCategory)
+categoryRouter.delete("/category/delete_category",transactionController.deleteCategory)
+
 
 module.exports =  categoryRouter
