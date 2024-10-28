@@ -97,7 +97,7 @@ deleteTransaction : asyncHandler(async(req,res)=>{
 
 
 
-transactionDetails : asyncHandler(async(req,res)=>{
+summary : asyncHandler(async(req,res)=>{
 
     
 const expenseTransaction = await Transaction.find({transactionType:"personalExpense"})
@@ -160,18 +160,39 @@ res.send("Category successfully created")
        
 }),
 
-
-
 deleteCategory : asyncHandler(async(req,res)=>{
 
     const {category} = req.body
     if(!category)
         throw new Error("Data incomplete")
 
-
 const findData =  await Transaction.deleteMany({category})
 
+}),
+
+getCategoryExpense: asyncHandler(async(req,res)=>{
+
+    const {category} = req.body
+    if(!category)
+        throw new Error("Incomplete data")
+
+    const getCategory = await Transaction.find({category})
+    
+    // const expenseTransaction = await getCategory
+
+
+
 })
+
+
+
+
+//  
+    
+
+ //const updateData = await Transaction.findOneAndUpdate({id})
+//   console.log(updateData)
+
 
 
 }
