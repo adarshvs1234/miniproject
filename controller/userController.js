@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const bcrypt = require('bcryptjs');
 const {Error}  = require("mongoose");
+const { findOne, findById } = require("../model/transactionSchema");
+
 // const password = require("password")
 
 
@@ -99,36 +101,46 @@ const userController = {
 
     changePassword : asyncHandler(async(req,res)=>{
 
-        
-        const {email,newPassword} = req.body
-      
-        const emailCheck = await User.findOne({emailId:email})
+        const {newPassword} = req.body  
+
+        const {id} = req.user;
+
+    //    console.log(id);
+
+      const newHashedPassword = await bcrypt.hash(newPassword,10)
      
-     if(!emailCheck)
-        throw new Error("Email does not exist")
+     
+      const data = await User.findById(id)
+    
+      
+      const hashedPassword = data.password
+    
 
-    const dbPassword = emailCheck.password
-    
-    const comparePassword = await bcrypt.compare(newPassword,dbPassword)
+      const comparePassword = await bcrypt.compare(newHashedPassword,hashedPassword)
 
-    if(comparePassword)
-            throw new Error("Password is same as the previous")
-    
-    newHashedPassword = await bcrypt.hash(newPassword,10)
-    const changedPassword = await User.findOneAndUpdate({emailId:email},{$set:{password:newHashedPassword}},{
-        runValidators:true,
-        new:true
-    })
-    console.log(changedPassword)
-    
+      if(comparePassword)
+          throw new Error("Password is same as previous")
+
+        
+        const changePassword = await User.findByIdAndUpdate(id,{$set:{password:newHashedPassword}},{
+
+                 runValidators:true,
+       new:true
+
+        })
+   
+     
+     if(!changePassword)
+         throw new Error("Password not changed")
+
     res.send("Password changed successfully")
         
 }),
 
  changeName : asyncHandler(async(req,res)=>{
 
-    const {email,newName} = req.body
-   const emailCheck =await User.findOne({emailId:email})
+    const {newName} = req.body
+   const emailCheck =await User.findOne({emailId})
    if(!emailCheck){
        throw new Error("Email doesn't exist")
    }

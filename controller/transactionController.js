@@ -14,7 +14,7 @@ const transactionController = {
         const {amount,category,description,transactionType,id} = req.body
         
     
-        if(!amount || !category || !description || !transactionType )
+        if(!amount || !category || !description || !transactionType || !id)
             throw new Error("Data is incomplete")
 
        const createdTransaction = await Transaction.create({
@@ -36,7 +36,7 @@ const transactionController = {
 
     if(!checkCategory)
     {
-        throw new Error("Category doesn't exist . Insert new category with newCategory keyword ")
+        throw new Error("Category doesn't exist . Insert new category ")
     
     }
 res.send("Transaction added successfully")
@@ -64,8 +64,12 @@ if(!id)
    const changedTransactionType = await Transaction.findOneAndUpdate({id},{$set:{transactionType:newTransactionType}})
 
    const changedDescription = await Transaction.findOneAndUpdate({id},{$set:{description:newDescription}})
-   
-   res.send("Successfully updated")
+
+   if(changedAmount || changedCategory || changedTransactionType || changedDescription)
+        res.send("Successfully updated")
+    
+   else
+    throw new Error("Data incomplete")
     
 }),
 
@@ -140,21 +144,25 @@ const incomeTransaction = await Transaction.find({transactionType:"Income"})
 addCategory : asyncHandler(async(req,res)=>{
 
     const {category} = req.body
-
     if(!category)
         throw new Error("Data is incomplete")
 
+
+
+    const categoryCheck = await Category.exists({category})
+    
+    if(categoryCheck)
+        throw new Error("Category already exist ")
+
+
+    
     const categoryCreate = await Category.create({
         category
     })
 
-    if(!categoryCreate)
+   if(!categoryCreate)
         throw new Error("Category not created")
-
-    const categoryCheck = await Category.exists({category})
-
-    if(categoryCheck)
-        throw new Error("Category already exists")
+       
 
 res.send("Category successfully created")
        
@@ -168,32 +176,33 @@ deleteCategory : asyncHandler(async(req,res)=>{
 
 const findData =  await Transaction.deleteMany({category})
 
+
+if(findData)
+    res.send("Category successfully deleted")
+
 }),
 
 getCategoryExpense: asyncHandler(async(req,res)=>{
 
-    const {category} = req.body
+    const {category} = req.params
     if(!category)
         throw new Error("Incomplete data")
 
-    const getCategory = await Transaction.find({category})
+    const getTransaction = await Transaction.find({category})
+    // console.log(getTransaction);
     
-    // const expenseTransaction = await getCategory
-
-
+    
+    const categoryExpense = getTransaction.reduce((acc,element)=>{
+        acc = element.amount +acc
+        return(acc)
+        
+    },0)
+    console.log(categoryExpense);
+    res.json({
+        expense:categoryExpense
+    })
 
 })
-
-
-
-
-//  
-    
-
- //const updateData = await Transaction.findOneAndUpdate({id})
-//   console.log(updateData)
-
-
 
 }
 
