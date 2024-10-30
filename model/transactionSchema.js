@@ -26,16 +26,13 @@ const transactionSchema = new mongoose.Schema({
         type:String,
         // required:[true,"Transaction is required"]
     },
-    
-    id:{
-        type:Number
-    },
 
 
-userId:{
+    userId:{
 
-    type:mongoose.Types.ObjectId,
-    ref:"User" 
+    type: mongoose.Types.ObjectId,
+    ref: "User"
+
 }
 
 },{

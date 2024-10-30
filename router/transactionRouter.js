@@ -8,8 +8,8 @@ transactionRouter.post("/transaction",middleware,transactionController.addTransa
 transactionRouter.get("/summary",middleware,transactionController.summary)
 transactionRouter.get("/category_expense/:category",middleware,transactionController.getCategoryExpense)
 transactionRouter.put("/:id",middleware,transactionController.updateTransaction)
-transactionRouter.get("/:id",middleware,transactionController.getTransaction)
-transactionRouter.delete("/:id",middleware,transactionController.deleteTransaction)
+transactionRouter.get("/get",middleware,transactionController.getTransaction)
+transactionRouter.delete("/delete",middleware,transactionController.deleteTransaction)
 
 
 
