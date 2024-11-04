@@ -2,9 +2,9 @@ const Transaction = require("../model/transactionSchema");
 const asyncHandler = require('express-async-handler');
 const Category = require("../model/categorySchema");
 const {Error} = require('mongoose');
-const { findById } = require("../model/userSchema");
-
-
+const { findById, findByIdAndUpdate } = require("../model/userSchema");
+const User = require("../model/userSchema");
+const userController = require("./userController");
 
 
 const transactionController = {
@@ -20,17 +20,22 @@ const transactionController = {
 
 
         let categoryCreated = await Category.exists({category})
-       //console.log(categoryCreated);
+      
         
         if(!categoryCreated){
     
                  categoryCreated = await Category.create({
+
                     category,
                     transactionType
+                    
+
+
                  })
-                    if(!categoryCreated){
-                    throw new Error("Category not created")
+            if(!categoryCreated){
+                throw new Error("Category not created")
             }
+
             console.log(categoryCreated);
             
             
@@ -40,17 +45,36 @@ const transactionController = {
    const createdTransaction = await Transaction.create({
 
         amount,
-        category,   //:categoryCreated._id,
+        category, //:categoryCreated._id,
         description,
         transactionType
-       
-   })
+
+
+    })
+
 
    if(!createdTransaction){
     throw new Error("Transaction is not created")
    }
-    res.send(createdTransaction)
 
+  
+
+
+//    console.log(id);
+   
+ 
+
+// const userUpdate =  Transaction.findByIdAndUpdate(id,{category : createdTransaction._id},
+//     {
+//     new : true,
+//     runValidators:true
+// })                  
+
+    //transaction inserted to the db
+
+   // res.send(userTransactionUpdate)
+
+   
 }),  
 
 
@@ -60,22 +84,32 @@ const transactionController = {
 
     const {newAmount,newCategory,newTransactionType,newDescription} =  req.body
     const {id} = req.user
-
+   // console.log(id);
+    
     
 if(!id)
         throw new Error("Incomplete data")
 
    
     
-    const changedAmount= await Transaction.findByIdAndUpdate(id,{amount:newAmount})
+    const updated = await Transaction.findByIdAndUpdate(id,
+    
+        {
+            amount:newAmount,
+            category:newCategory,
+            transactionType:newTransactionType,
+            description:newDescription
 
-    const changedCategory = await Transaction.findByIdAndUpdate(id,{category:newCategory})
+        },{
+        
+        new : true,
+        runValidators : true
+ })
 
-   const changedTransactionType = await Transaction.findByIdAndUpdate(id,{transactionType:newTransactionType})
+   
 
-   const changedDescription = await Transaction.findByIdAndUpdate(id,{description:newDescription})
-
-   if(changedAmount || changedCategory || changedTransactionType || changedDescription)
+ 
+if(updated)
         res.send("Successfully updated")
     
    else
@@ -90,9 +124,7 @@ getTransaction : asyncHandler(async(req,res)=>{
     res.send(allTransactionData)
 
     
-const data = await Transaction.findById(id)
 
-    console.log(data)
 }),
 
 

@@ -11,10 +11,7 @@ const transactionSchema = new mongoose.Schema({
         default:0
     },
 
-    category:{
-        type:String,
-        // required:[true,"Category is required"]
-    },
+    
 
     description:{   
         type:String,
@@ -27,13 +24,20 @@ const transactionSchema = new mongoose.Schema({
         // required:[true,"Transaction is required"]
     },
 
-
-    userId:{
-
+     user:{                                 //one to one (transaction -> user)
     type: mongoose.Types.ObjectId,
-    ref: "User"
+     ref: "User"
 
-}
+ },
+
+
+category :{                               //one to one (transaction -> Category)  
+
+    type : mongoose.Types.ObjectId,
+    ref : "Category"
+},
+
+
 
 },{
     timestamps:true

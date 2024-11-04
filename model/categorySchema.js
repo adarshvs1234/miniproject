@@ -9,13 +9,15 @@ const categorySchema = new mongoose.Schema({
         type : String
     },
 
-transaction  :[{                       //one to many (category -> transaction)
-type : mongoose.Types.ObjectId,
-ref : "Transaction"
-}]
 
+ transaction  :[{                       //one to many (category -> transaction)
+  type : mongoose.Types.ObjectId,
+  ref : "Transaction"
+ }]
 
 })
+
+
 const Category = mongoose.model('Category',categorySchema)
 
 module.exports = Category

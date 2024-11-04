@@ -21,15 +21,11 @@ const userSchema = new mongoose.Schema({
         type:mongoose.Types.ObjectId,
         ref:"Transaction"
     }],
-    category:[{                                 //one to many (user -> Category)
-        type:mongoose.Types.ObjectId,
-        ref:"Category"
-    }],
+    // category:[{                                 //one to many (user -> Category)
+    //     type:mongoose.Types.ObjectId,
+    //     ref:"Category"
+    // }],
 
-    transaction:[{                               //one to many (user -> Transaction)
-       type : mongoose.Types.ObjectId,
-       ref:"Transaction"  
-    }]
     
     // Timestamp:true
 

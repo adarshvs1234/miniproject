@@ -5,6 +5,8 @@ require('dotenv').config()
 const bcrypt = require('bcryptjs');
 const {Error}  = require("mongoose");
 const { findOne, findById } = require("../model/transactionSchema");
+const transactionController = require("./transactionController");
+
 
 // const password = require("password")
 
@@ -47,11 +49,20 @@ const userController = {
             sameSite:'none'
         })
         
+        
+        
+   // const {id} =  req.user
+
+
+    // const userTransactionUpdate =  User.findByIdAndUpdate(id,{transaction : createdTransaction})  //transaction inserted to the db
+
+
         res.send("User successfully created")
     }),
     signIn :asyncHandler(async(req,res)=>{
        
         const {email,password} = req.body 
+        //const {id} =  req.user
 
         const userFound = await User.findOne({emailId: email}) 
        
@@ -85,11 +96,16 @@ const userController = {
             sameSite:'none',
      })
 
-    
+     
+     //console.log(id);
+
+
         res.send("Successfully Signed in")
-                  
+
         
-     }),
+        
+                  
+        }),
 
     logout: asyncHandler(async(req,res)=>{
       res.clearCookie("token")
@@ -106,6 +122,7 @@ const data = await User.findById(id)
 console.log(data);
 
 const dbPassword = data.password
+
 
 const comparePassword = await bcrypt.compare(newPassword,dbPassword)
     
@@ -147,6 +164,9 @@ const comparePassword = await bcrypt.compare(newPassword,dbPassword)
 const data = await User.findByIdAndUpdate(id,{userName:newName},{new:true,runValidators:true})
 
    console.log(data);
+
+  // console.log(id);
+   
    
 
 if(!data)
