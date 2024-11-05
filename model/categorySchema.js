@@ -8,12 +8,15 @@ const categorySchema = new mongoose.Schema({
     transactionType:{
         type : String
     },
+//  transaction  :[{                       //one to many (category -> transaction)
+//   type : mongoose.Types.ObjectId,
+//   ref : "Transaction"
+//  }],
 
-
- transaction  :[{                       //one to many (category -> transaction)
-  type : mongoose.Types.ObjectId,
-  ref : "Transaction"
- }]
+ user : {                               
+    type : mongoose.Types.ObjectId,   //one to one(category ->user)
+    ref : "User"
+ }
 
 })
 

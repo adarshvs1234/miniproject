@@ -11,69 +11,57 @@ const transactionController = {
     
 
     addTransaction : asyncHandler(async(req,res)=>{
-
+        const {id} = req.user
+    
         const {amount,category,description,transactionType} = req.body
-       
        
         if(!amount || !category || !description || !transactionType )
             throw new Error("Data is incomplete")
 
+        let categoryCreated = await  Category.findOne({category})
 
-        let categoryCreated = await Category.exists({category})
-      
-        
         if(!categoryCreated){
-    
                  categoryCreated = await Category.create({
-
                     category,
-                    transactionType
-                    
+                    transactionType,
+                    user:id  
+        })
+    }
 
+    //console.log(categoryCreated);
+    
 
-                 })
-            if(!categoryCreated){
-                throw new Error("Category not created")
-            }
-
-            console.log(categoryCreated);
-            
-            
-        }
-
-        
-   const createdTransaction = await Transaction.create({
+  
+    const createdTransaction = await Transaction.create({
 
         amount,
-        category, //:categoryCreated._id,
+        category:categoryCreated._id,
         description,
-        transactionType
+        transactionType,
+        user:id
 
 
     })
-
-
    if(!createdTransaction){
     throw new Error("Transaction is not created")
    }
-
   
 
+  const userUpdate = await User.findByIdAndUpdate(id,{transaction : createdTransaction._id},
 
-//    console.log(id);
-   
- 
+   {
+        new : true,
+       runValidators:true
+     })                                         //transaction inserted to the db
 
-// const userUpdate =  Transaction.findByIdAndUpdate(id,{category : createdTransaction._id},
-//     {
-//     new : true,
-//     runValidators:true
-// })                  
 
-    //transaction inserted to the db
+     //const userCategoryupdate = await  User.findByIdAndUpdate(id,{category:categoryCreated._id })
 
-   // res.send(userTransactionUpdate)
-
+    
+  
+     console.log(userUpdate);
+     
+res.send("Transaction successfully updated")
    
 }),  
 
@@ -130,7 +118,7 @@ getTransaction : asyncHandler(async(req,res)=>{
 
 deleteTransaction : asyncHandler(async(req,res)=>{
 
-    
+
     const deletedData = await Transaction.deleteTransaction
      res.send("Successfully deleted")
 
