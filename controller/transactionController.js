@@ -1,7 +1,7 @@
 const Transaction = require("../model/transactionSchema");
 const asyncHandler = require('express-async-handler');
 const Category = require("../model/categorySchema");
-const {Error} = require('mongoose');
+const {Error, default: mongoose} = require('mongoose');
 const { findById, findByIdAndUpdate } = require("../model/userSchema");
 const User = require("../model/userSchema");
 const userController = require("./userController");
@@ -47,18 +47,23 @@ const transactionController = {
    }
   
 
-  const userUpdate = await User.findByIdAndUpdate(id,{transaction : createdTransaction._id},
+  const userUpdate = await User.findByIdAndUpdate(id,{$push:{transaction : createdTransaction._id}},
 
    {
         new : true,
        runValidators:true
      })                                         //transaction inserted to the db
+                              
 
+     const categeoryTransactionUpdate = await Category.findByIdAndUpdate(categoryCreated._id,{$push:{transaction : createdTransaction._id}},
 
-     //const userCategoryupdate = await  User.findByIdAndUpdate(id,{category:categoryCreated._id })
+        {
+             new : true,
+            runValidators:true
+          })   
 
-    
-  
+     console.log(categeoryTransactionUpdate);
+     
      console.log(userUpdate);
      
 res.send("Transaction successfully updated")
@@ -70,17 +75,13 @@ res.send("Transaction successfully updated")
 
  updateTransaction : asyncHandler(async(req,res)=>{
 
-    const {newAmount,newCategory,newTransactionType,newDescription} =  req.body
-    const {id} = req.user
-   // console.log(id);
     
-    
-if(!id)
-        throw new Error("Incomplete data")
+     const {newAmount,newCategory,newTransactionType,newDescription} =  req.body
+ const {id} = req.params
+  console.log(id)
 
-   
-    
-    const updated = await Transaction.findByIdAndUpdate(id,
+
+  const updatedTransaction = await Transaction.findByIdAndUpdate(id,
     
         {
             amount:newAmount,
@@ -94,20 +95,19 @@ if(!id)
         runValidators : true
  })
 
-   
+   console.log(updatedTransaction)
 
  
-if(updated)
+ if(updatedTransaction)
         res.send("Successfully updated")
     
-   else
-    throw new Error("Data incomplete")
+    else
+     throw new Error("Data incomplete")
     
 }),
 
 getTransaction : asyncHandler(async(req,res)=>{
 
-   
    const allTransactionData = await Transaction.find()
     res.send(allTransactionData)
 
@@ -116,11 +116,32 @@ getTransaction : asyncHandler(async(req,res)=>{
 }),
 
 
-deleteTransaction : asyncHandler(async(req,res)=>{
+deleteTransaction : asyncHandler(async(req,res)=>{   //deleteAllTransactions
 
 
-    const deletedData = await Transaction.deleteTransaction
-     res.send("Successfully deleted")
+    const userId = req.user.id
+    
+    const {id} = req.params
+ 
+   console.log(id);
+    
+const transactionDelete = await Transaction.findByIdAndDelete(id);
+
+if(!transactionDelete)
+    throw new Error("Transaction doesn't exist ")
+ 
+
+const userDelete = await User.findByIdAndUpdate(userId ,{ "$pull": {transaction : new mongoose.Types.ObjectId(id)}},
+
+{
+        
+    new : true,
+    runValidators : true
+})
+
+
+res.send("Transaction deleted successfully")
+
 
 }),
 
@@ -128,109 +149,150 @@ deleteTransaction : asyncHandler(async(req,res)=>{
 
 summary : asyncHandler(async(req,res)=>{
 
+    const userId = req.user.id 
+    console.log(userId);
     
-const expenseTransaction = await Transaction.find({transactionType:"personalExpense"})
-const incomeTransaction = await Transaction.find({transactionType:"Income"})
+    const results = await User.aggregate([
+        {
+            $match: {
+              _id: new mongoose.Types.ObjectId(userId)
+            }
+          },
+ {
+    $lookup: {
+      from: "transactions",  // The collection to join with
+      localField: "transaction",  // The field in the user document that holds the transaction ObjectIds
+      foreignField: "_id",  // The field in the transaction document that corresponds to the user transaction ID
+      as: "transactionDetails"  // The field to store the joined transaction data
+    }
+  },
+  {
+    $unwind : "$transactionDetails"
+  },
+{
+  $project : { userName : 0,
+    _id:0,
+    emailId : 0,
+    password : 0,
+    transaction : 0,
+    createdAt:0,
+    updatedAt:0,
+    __v:0
+
+
+  }
+}
+])
+
+
+const totalExpense = results.reduce((acc,element)=>{
+        acc = element.transactionDetails.amount +acc
+         return(acc)
+ },0)
 
 
 
-    if(!expenseTransaction)
-        throw new Error("Transaction type doesn't exist")
-
-    if(!incomeTransaction)
-        throw new Error("Transaction type doesn't exist")
-
-
-    const totalIncome = incomeTransaction.reduce((acc,element)=>{
-
-        acc = element.amount + acc
-        return(acc)
-        
-    },0)
-
-    
-    const totalExpense = expenseTransaction.reduce((acc,element)=>{
-        acc = element.amount +acc
-        return(acc)
-        
-    },0)
-
-    const totalBalance = totalIncome-totalExpense
-    
-    res.json({
-        totalIncome,
-        totalExpense,
-        totalBalance
-    })
-    
+    console.log("Total Expense is :",totalExpense);
+ 
 }),
 
 
-deleteCategory : asyncHandler(async(req,res)=>{
+deleteCategory  : asyncHandler(async(req,res)=>{
 
+    const {id} = req.user
+    console.log(id)
     const {category} = req.body
+
     if(!category)
         throw new Error("Data incomplete")
 
-const findData =  await Transaction.find({category})
-console.log(findData);
+
+    const deleteCategory =await Category.findByIdAndDelete(id,{category})
+
+    if(!deleteCategory)
+        throw new Error("Deletion unsucessfull")
 
 
-if(findData)
-    res.send("Category successfully deleted")
+
+// if(deleteCategory)
+//     res.send("Category successfully deleted")
+
+console.log(deleteCategory)
 
 }),
+
+
 
 getCategoryExpense: asyncHandler(async(req,res)=>{
 
+    
+    const {id} = req.user
     const {category} = req.body
+
     if(!category)
         throw new Error("Incomplete data")
 
-    const getTransaction = await Transaction.find({category})
-    // console.log(getTransaction);
-    
-    
-    const categoryExpense = getTransaction.reduce((acc,element)=>{
-        acc = element.amount +acc
-        return(acc)
-        
-    },0)
-    console.log(categoryExpense);
-    res.json({
-        expense:categoryExpense
-    })
+
+    const results = await User.aggregate([
+        {
+          $match: { _id: new mongoose.Types.ObjectId(userId) }
+        },
+        {
+          $lookup: {
+            from: "transactions",
+            localField: "transaction",
+            foreignField: "_id",
+            as: "transactionDetails"
+          }
+        },
+        { $unwind: "$transactionDetails" },
+        {
+          $project: {
+            "transactionDetails.amount": 1  // Only project amount for calculation
+          }
+        }
+      ]);
+      
+      // Calculate the total expense in a simplified way
+      const totalExpense = results.reduce((sum, { transactionDetails }) => sum + transactionDetails.amount, 0);
+      
+      console.log("Total Expense is:", totalExpense);
 
 }),
 
-categoryTransaction : asyncHandler(async(req,res)=>{
+categoryTransaction : asyncHandler(async(req,res)=>{         //Full list of transactions        
 
-const {transactionType} = req.body 
-const categoryData =  await Category.find({transactionType})
-console.log(categoryData);
+    const userId  = req.user
+    console.log(userId)
 
-
-const  categories = categoryData.map(element => {
-    return element.category
-})
-
-console.log(categories);
-
- //const categories =  data.category
+    const {category} = req.body
+    console.log(category)
 
 
-// const transactionCategory = data.reduce((acc,element)=>{
-//     acc = element.amount +acc
-//     return(acc)
+   const results = await Transaction.aggregate([
+        {
+          $match: { _id : new mongoose.Types.ObjectId(userId) }
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "_id",
+            foreignField: "_id",
+            as: "transactionDetails"
+          }
+        },
+        { $unwind: "$transactionDetails" },
+        
+        
+      ])
+      
+      // Calculate the total expense in a simplified way
+      console.log(results);
+      
+
+
     
-// },0)
-
-
-res.json({
-    category:categories
-})
-
-
+    // const user = userCheck.category 
 
 
 
